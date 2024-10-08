@@ -18,7 +18,7 @@ public final class MultipleChoiceQuestion implements Question {
             this.correctAnswers.add(answer.trim().toLowerCase());
         }
     }
-
+//test
     @Override
     public String getQuestionText() {
         return questionText;
