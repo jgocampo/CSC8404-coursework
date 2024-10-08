@@ -19,19 +19,18 @@ public final class MultipleChoiceQuestion implements Question {
         }
     }
 
-    @Override
     public String getQuestionText() {
         return questionText;
     }
 
-    @Override
+
     public boolean checkAnswer(String answer) {
         if (answer == null) return false;
         Set<String> providedAnswers = new HashSet<>(Arrays.asList(answer.trim().toLowerCase().split("\\s*,\\s*")));
         return correctAnswers.equals(providedAnswers);
     }
 
-    @Override
+
     public String toString() {
         return "Multiple Choice Question: " + questionText;
     }

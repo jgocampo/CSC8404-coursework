@@ -14,18 +14,18 @@ public final class FreeResponseQuestion implements Question {
         this.correctAnswer = correctAnswer.trim().toLowerCase();
     }
 
-    @Override
+
     public String getQuestionText() {
         return questionText;
     }
 
-    @Override
+
     public boolean checkAnswer(String answer) {
         if (answer == null) return false;
         return correctAnswer.equals(answer.trim().replaceAll("\\s+", " ").toLowerCase());
     }
 
-    @Override
+
     public String toString() {
         return "Question: " + questionText;
     }

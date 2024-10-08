@@ -17,7 +17,7 @@ public abstract class QuizFactory implements Quiz {
         this.studentHistory = new HashMap<>();
     }
 
-    @Override
+
     public Quiz generateQuiz(int numberOfQuestions) {
         if (numberOfQuestions < 1 || numberOfQuestions > questionPool.size()) {
             throw new IllegalArgumentException("Invalid number of questions.");
@@ -27,7 +27,7 @@ public abstract class QuizFactory implements Quiz {
         return createQuizInstance(selectedQuestions);  // Método abstracto que será implementado en las subclases
     }
 
-    @Override
+
     public Quiz revise(Student student, int numberOfQuestions) {
         if (!studentHistory.containsKey(student)) {
             throw new IllegalArgumentException("Student has not taken any quizzes yet.");

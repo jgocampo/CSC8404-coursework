@@ -10,17 +10,17 @@ public final class RegularQuiz extends QuizFactory {
         super(questionPool);
     }
 
-    @Override
+
     protected Quiz createQuizInstance(List<Question> selectedQuestions) {
         return new RegularQuiz(selectedQuestions);
     }
-// test
-    @Override
+
+
     protected Quiz createRevisionQuizInstance(List<Question> revisionQuestions, Student student) {
         throw new UnsupportedOperationException("RegularQuiz cannot generate a revision quiz.");
     }
 
-    @Override
+
     public double takeQuiz(Student student, List<Question> questions, List<String> answers) {
         int correctAnswers = 0;
         for (int i = 0; i < questions.size(); i++) {
@@ -32,7 +32,7 @@ public final class RegularQuiz extends QuizFactory {
         return (double) correctAnswers / questions.size();
     }
 
-    @Override
+
     public double takeRevisionQuiz(Student student, List<Question> questions, List<String> answers) {
         throw new UnsupportedOperationException("RegularQuiz cannot take revision quizzes.");
     }
