@@ -32,7 +32,6 @@ public final class RegularQuiz extends QuizFactory {
         return (double) correctAnswers / questions.size();
     }
 
-
     public double takeRevisionQuiz(Student student, List<Question> questions, List<String> answers) {
         throw new UnsupportedOperationException("RegularQuiz cannot take revision quizzes.");
     }

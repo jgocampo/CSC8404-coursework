@@ -24,7 +24,7 @@ public abstract class QuizFactory implements Quiz {
         }
         Collections.shuffle(questionPool);
         List<Question> selectedQuestions = new ArrayList<>(questionPool.subList(0, numberOfQuestions));
-        return createQuizInstance(selectedQuestions);  // Método abstracto que será implementado en las subclases
+        return createQuizInstance(selectedQuestions);  // Metodo abstracto que será implementado en las subclases
     }
 
 
@@ -40,13 +40,13 @@ public abstract class QuizFactory implements Quiz {
         return createRevisionQuizInstance(revisionQuestions.subList(0, numberOfQuestions), student);
     }
 
-    // Método abstracto para crear una instancia de quiz regular
+    // Metodo abstracto para crear una instancia de quiz regular
     protected abstract Quiz createQuizInstance(List<Question> selectedQuestions);
 
-    // Método abstracto para crear una instancia de quiz de revisión
+    // Metodo abstracto para crear una instancia de quiz de revisión
     protected abstract Quiz createRevisionQuizInstance(List<Question> revisionQuestions, Student student);
 
-    // Método para obtener las preguntas no respondidas o incorrectas de un estudiante
+    // Metodo para obtener las preguntas no respondidas o incorrectas de un estudiante
     private List<Question> getUnansweredOrIncorrectQuestions(Student student) {
         List<Question> history = studentHistory.get(student);
         List<Question> revisionQuestions = new ArrayList<>();
@@ -58,7 +58,7 @@ public abstract class QuizFactory implements Quiz {
         return revisionQuestions;
     }
 
-    // Método para registrar los intentos del quiz en el historial
+    // Metodo para registrar los intentos del quiz en el historial
     protected void recordQuizAttempt(Student student, List<Question> questions) {
         studentHistory.computeIfAbsent(student, k -> new ArrayList<>()).addAll(questions);
     }

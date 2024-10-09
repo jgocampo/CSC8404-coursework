@@ -2,6 +2,7 @@ package statistics;
 
 import student.Student;
 import java.util.*;
+import quiz.*;
 
 public class Statistics {
     private final Student student;
@@ -62,21 +63,6 @@ public class Statistics {
         }
     }
 
-    // Devuelve el promedio de puntajes de quizzes regulares
-    public double getAverageRegularQuizScore() {
-        return regularQuizScores.stream()
-                .mapToDouble(Double::doubleValue)
-                .average()
-                .orElse(0.0);
-    }
-
-    // Devuelve el promedio de puntajes de quizzes de revisión
-    public double getAverageRevisionQuizScore() {
-        return revisionQuizScores.stream()
-                .mapToDouble(Double::doubleValue)
-                .average()
-                .orElse(0.0);
-    }
 
     // Devuelve todos los puntajes de quizzes regulares
     public List<Double> getAllRegularQuizScores() {
