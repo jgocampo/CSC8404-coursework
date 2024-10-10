@@ -1,33 +1,32 @@
 package question;
 
-import java.util.Objects;
-
-public final class FreeResponseQuestion implements Question {
-    private final String questionText;
+public class FreeResponseQuestion implements Question {
+    private final String questionFormulation;
     private final String correctAnswer;
 
-    public FreeResponseQuestion(String questionText, String correctAnswer) {
-        if (questionText == null || correctAnswer == null) {
-            throw new IllegalArgumentException("Question and answer cannot be null.");
+    public FreeResponseQuestion(String questionFormulation, String correctAnswer) {
+        if (questionFormulation == null || correctAnswer == null) {
+            throw new IllegalArgumentException("Question formulation and answer cannot be null.");
         }
-        this.questionText = questionText;
-        this.correctAnswer = correctAnswer.trim().toLowerCase();
+        this.questionFormulation = questionFormulation.trim();
+        this.correctAnswer = normalizeAnswer(correctAnswer);  // Normalizar respuesta
     }
 
-
-    public String getQuestionText() {
-        return questionText;
+    @Override
+    public String getQuestionFormulation() {
+        return questionFormulation;
     }
 
-
+    @Override
     public boolean checkAnswer(String answer) {
         if (answer == null) return false;
-        return correctAnswer.equals(answer.trim().replaceAll("\\s+", " ").toLowerCase());
+        return normalizeAnswer(answer).equals(correctAnswer);
     }
 
-
-    public String toString() {
-        return "Question: " + questionText;
+    // Normaliza la respuesta eliminando espacios adicionales y haciendo todo minúscula
+    private String normalizeAnswer(String answer) {
+        return answer.trim().replaceAll("\\s+", " ").toLowerCase();
     }
 }
+
 

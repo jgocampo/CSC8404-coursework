@@ -1,8 +1,9 @@
 package quiz;
+
 import question.Question;
 import student.Student;
-import java.util.*;
-
+import statistics.Statistics;
+import java.util.List;
 
 public final class RegularQuiz extends QuizFactory {
 
@@ -10,29 +11,38 @@ public final class RegularQuiz extends QuizFactory {
         super(questionPool);
     }
 
-
+    @Override
     protected Quiz createQuizInstance(List<Question> selectedQuestions) {
-        return new RegularQuiz(selectedQuestions);
+        return new RegularQuiz(selectedQuestions);  // Devuelve una nueva instancia de quiz regular con las preguntas seleccionadas
     }
 
-
+    @Override
     protected Quiz createRevisionQuizInstance(List<Question> revisionQuestions, Student student) {
         throw new UnsupportedOperationException("RegularQuiz cannot generate a revision quiz.");
     }
 
-
+    @Override
     public double takeQuiz(Student student, List<Question> questions, List<String> answers) {
+        // Verificar si el estudiante es elegible para tomar un quiz regular
+        Statistics stats = student.getStatistics();
+        if (!stats.canTakeRegularQuiz()) {
+            System.out.println("Student cannot take more regular quizzes. Final verdict: " + stats.getVerdict());
+            return 0.0;  // No puede tomar el quiz
+        }
+
+        // Calcular el puntaje
         int correctAnswers = 0;
         for (int i = 0; i < questions.size(); i++) {
             if (questions.get(i).checkAnswer(answers.get(i))) {
                 correctAnswers++;
             }
         }
-        recordQuizAttempt(student, questions);  // Registrar el intento
-        return (double) correctAnswers / questions.size();
-    }
+        double score = (double) correctAnswers / questions.size();
 
-    public double takeRevisionQuiz(Student student, List<Question> questions, List<String> answers) {
-        throw new UnsupportedOperationException("RegularQuiz cannot take revision quizzes.");
+        // Registrar el puntaje en las estadísticas
+        stats.recordRegularQuizScore(score);
+
+        // Retornar el puntaje
+        return score;
     }
 }

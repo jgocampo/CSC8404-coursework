@@ -1,47 +1,64 @@
 package student;
+
+import statistics.Statistics;
 import java.util.Date;
 import java.util.Objects;
 
 public final class Student {
     private final String firstName;
     private final String lastName;
-    private final Date birthDate;
+    private final Date dateOfBirth;
+    private final Statistics statistics;
 
-    public Student(String firstName, String lastName, Date birthDate) {
-        if (firstName == null || lastName == null || birthDate == null) {
-            throw new IllegalArgumentException("Arguments can't be null.");
-        }
+    // Constructor
+    public Student(String firstName, String lastName, Date dateOfBirth) {
         this.firstName = firstName.trim();
         this.lastName = lastName.trim();
-        this.birthDate = new Date(birthDate.getTime());
+        this.dateOfBirth = new Date(dateOfBirth.getTime());  // Hacer una copia de la fecha para proteger la inmutabilidad
+        this.statistics = new Statistics(this);  // Cada estudiante tiene un objeto de estadísticas
     }
 
-    public String getFullName() {
+    // Getters
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public String getName() {
         return firstName + " " + lastName;
     }
 
-    public Date getBirthDate() {
-        return new Date(birthDate.getTime());
+    public Date getDateOfBirth() {
+        return new Date(dateOfBirth.getTime());  // Retorna una copia para proteger la inmutabilidad
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Student student = (Student) o;
-        return firstName.equals(student.firstName) &&
-                lastName.equals(student.lastName) &&
-                birthDate.equals(student.birthDate);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(firstName, lastName, birthDate);
+    public Statistics getStatistics() {
+        return statistics;
     }
 
     @Override
     public String toString() {
-        return firstName + " " + lastName + " (born " + birthDate + ")";
+        return firstName + " " + lastName + " (born " + dateOfBirth + ")";
+    }
+
+    // Igualdad de estudiantes basada en nombre y fecha de nacimiento
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Student)) return false;
+        Student student = (Student) o;
+        return firstName.equalsIgnoreCase(student.firstName) &&
+                lastName.equalsIgnoreCase(student.lastName) &&
+                dateOfBirth.equals(student.dateOfBirth);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName.toLowerCase(), lastName.toLowerCase(), dateOfBirth);
     }
 }
+
 
