@@ -8,6 +8,7 @@ public abstract class QuizFactory implements Quiz {
     protected final List<Question> questionPool;  // Pool de preguntas disponibles para los quizzes
     protected final Map<Student, List<Question>> studentHistory;  // Historial de preguntas respondidas por el estudiante
 
+
     public QuizFactory(List<Question> questionPool) {
         if (questionPool == null || questionPool.isEmpty()) {
             throw new IllegalArgumentException("The question pool cannot be empty.");
@@ -53,6 +54,7 @@ public abstract class QuizFactory implements Quiz {
 
     // Método abstracto para crear una instancia de quiz de revisión
     protected abstract Quiz createRevisionQuizInstance(List<Question> revisionQuestions, Student student);
+
 
     // Obtener preguntas no respondidas o respondidas incorrectamente
     protected List<Question> getUnansweredOrIncorrectQuestions(Student student) {

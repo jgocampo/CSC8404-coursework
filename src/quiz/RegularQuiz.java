@@ -22,27 +22,49 @@ public final class RegularQuiz extends QuizFactory {
     }
 
     @Override
+//    public double takeQuiz(Student student, List<Question> questions, List<String> answers) {
+//        // Verificar si el estudiante es elegible para tomar un quiz regular
+//        Statistics stats = student.getStatistics();
+//        if (!stats.canTakeRegularQuiz()) {
+//            System.out.println("Student cannot take more regular quizzes. Final verdict: " + stats.getVerdict());
+//            return 0.0;  // No puede tomar el quiz
+//        }
+//
+//        // Calcular el puntaje
+//        int correctAnswers = 0;
+//        for (int i = 0; i < questions.size(); i++) {
+//            if (questions.get(i).checkAnswer(answers.get(i))) {
+//                correctAnswers++;
+//            }
+//        }
+//        double score = (double) correctAnswers / questions.size();
+//
+//        // Registrar el puntaje en las estadísticas
+//        stats.recordRegularQuizScore(score);
+//
+//        // Retornar el puntaje
+//        return score;
+//    }
+
     public double takeQuiz(Student student, List<Question> questions, List<String> answers) {
-        // Verificar si el estudiante es elegible para tomar un quiz regular
+        // Verificar si el estudiante tiene un veredicto
         Statistics stats = student.getStatistics();
-        if (!stats.canTakeRegularQuiz()) {
-            System.out.println("Student cannot take more regular quizzes. Final verdict: " + stats.getVerdict());
-            return 0.0;  // No puede tomar el quiz
+        String verdict = stats.getVerdict();
+
+        // Si el veredicto es PASS o FAIL, lanzar una IllegalStateException
+        if ("PASS".equals(verdict) || "FAIL".equals(verdict)) {
+            throw new IllegalStateException("Student cannot take more regular quizzes. Final verdict: " + verdict);
         }
 
-        // Calcular el puntaje
+        // Implementación normal para tomar el quiz
         int correctAnswers = 0;
         for (int i = 0; i < questions.size(); i++) {
             if (questions.get(i).checkAnswer(answers.get(i))) {
                 correctAnswers++;
             }
         }
-        double score = (double) correctAnswers / questions.size();
 
-        // Registrar el puntaje en las estadísticas
-        stats.recordRegularQuizScore(score);
-
-        // Retornar el puntaje
-        return score;
+        // Calcular la puntuación
+        return (double) correctAnswers / questions.size();
     }
 }
