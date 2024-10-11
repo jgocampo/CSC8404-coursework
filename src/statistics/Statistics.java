@@ -79,4 +79,14 @@ public final class Statistics {
     public String getVerdict() {
         return verdict;
     }
+
+    public int getRegularAttempts(){
+        return regularAttempts;
+    }
+
+    public int getRevisionAttempts(){
+        return revisionAttempts;
+    }
+
+
 }
