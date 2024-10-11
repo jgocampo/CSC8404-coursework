@@ -23,7 +23,7 @@ public class FreeResponseQuestion implements Question {
         return normalizeAnswer(answer).equals(correctAnswer);
     }
 
-    // Normaliza la respuesta eliminando espacios adicionales y haciendo todo minúscula
+
     private String normalizeAnswer(String answer) {
         return answer.trim().replaceAll("\\s+", " ").toLowerCase();
     }

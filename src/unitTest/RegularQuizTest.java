@@ -126,13 +126,13 @@ public class RegularQuizTest {
     public void testQuizWithMultipleTypesOfQuestions() {
         List<Question> questions = Arrays.asList(
                 new FreeResponseQuestion("What is the capital of France?", "Paris"),
-                new MultipleChoiceQuestion("Which of these are programming languages?", new String[]{"Java", "Python", "C++"})
+                new MultipleChoiceQuestion("Which of these are programming languages?", new String[]{"a", "b", "c"})
         );
         RegularQuiz quiz = new RegularQuiz(questions);
 
         Student student = new Student("John", "Doe", new java.util.Date());
 
-        List<String> answers = Arrays.asList("Paris", "Java,Python,C++");
+        List<String> answers = Arrays.asList("Paris", "a,b,c");
         double score = quiz.takeQuiz(student, questions, answers);
 
         assertEquals(1.0, score);  // Respuestas correctas para ambos tipos de preguntas
