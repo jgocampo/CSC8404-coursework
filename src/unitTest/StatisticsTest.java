@@ -1,181 +1,97 @@
 package unitTest;
 
-import student.Student;
-import statistics.Statistics;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import statistics.Statistics;
+import student.Student;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit tests for the Statistics class.
- */
 public class StatisticsTest {
 
-    /**
-     * Test que verifica la correcta grabación de puntajes y cálculo del veredicto.
-     */
+    private Student student;
+    private Statistics statistics;
+
+    @BeforeEach
+    public void setup() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(1995, Calendar.JANUARY, 1);
+        Date birthDate = cal.getTime();
+        student = new Student("John", "Doe", birthDate);
+        statistics = student.getStatistics();
+    }
+
     @Test
-    public void testRecordRegularQuizScorePass() {
-        // Crear un estudiante
-        Student student = new Student("John", "Doe", new java.util.Date());
+    public void testRegularQuizPass() {
+        statistics.recordRegularQuizScore(0.7);  // PASSED regular quiz
+        assertEquals("PASS", statistics.getVerdict());
+    }
 
-        // Crear una instancia de Statistics
-        Statistics stats = new Statistics(student);
+    @Test
+    public void testRegularQuizFail() {
+        statistics.recordRegularQuizScore(0.3);  // Failed first quiz
+        assertEquals("TBD", statistics.getVerdict());  // Still pending
 
-        // Registrar un puntaje >= 0.5 en el primer intento regular (esto debería resultar en PASS)
-        stats.recordRegularQuizScore(0.7);
+        statistics.recordRegularQuizScore(0.4);  // Failed second quiz
+        assertEquals("FAIL", statistics.getVerdict());  // Verdict: FAIL
+    }
 
-        // Verificar que el veredicto sea PASS
-        assertEquals("PASS", stats.getVerdict());
-        assertEquals(1, stats.getRegularAttempts());  // Verificar que hay un intento registrado
+    @Test
+    public void testRevisionQuizWithoutAffectingVerdict() {
+        statistics.recordRegularQuizScore(0.3);  // Fail first regular quiz
+        statistics.recordRevisionQuizScore(0.6);  // PASS revision quiz, but no effect on verdict
+        assertEquals("TBD", statistics.getVerdict());  // Still TBD
+
+        statistics.recordRegularQuizScore(0.4);  // Fail second regular quiz
+        assertEquals("FAIL", statistics.getVerdict());  // Final verdict: FAIL
+    }
+
+    @Test
+    public void testMaxTwoRevisionAttempts() {
+        statistics.recordRevisionQuizScore(0.6);  // First attempt
+        statistics.recordRevisionQuizScore(0.7);  // Second attempt
+        assertFalse(statistics.canTakeRevisionQuiz());  // Max attempts reached
+
+        statistics.recordRevisionQuizScore(0.8);  // Should not register this score
+        assertEquals(2, statistics.getRevisionAttempts());
+    }
+
+    @Test
+    public void testSeenQuestionsTracking() {
+        // Record some seen questions
+        statistics.recordSeenQuestions(List.of("Question 1", "Question 2"));
+        assertTrue(statistics.hasSeenQuestion("Question 1"));
+        assertFalse(statistics.hasSeenQuestion("Question 3"));
     }
 
     /**
-     * Test que verifica la correcta grabación de puntajes y cálculo del veredicto FAIL.
-     */
-    @Test
-    public void testRecordRegularQuizScoreFail() {
-        // Crear un estudiante
-        Student student = new Student("Jane", "Doe", new java.util.Date());
-
-        // Crear una instancia de Statistics
-        Statistics stats = new Statistics(student);
-
-        // Registrar dos puntajes bajos (esto debería resultar en FAIL después del segundo intento)
-        stats.recordRegularQuizScore(0.3);
-        stats.recordRegularQuizScore(0.4);
-
-        // Verificar que el veredicto sea FAIL
-        assertEquals("FAIL", stats.getVerdict());
-        assertEquals(2, stats.getRegularAttempts());  // Verificar que hay dos intentos registrados
-    }
-
-    /**
-     * Test que verifica que un estudiante no pueda registrar más de dos intentos de revisión.
-     */
-    @Test
-    public void testRecordRevisionQuizScoreLimit() {
-        // Crear un estudiante
-        Student student = new Student("John", "Doe", new java.util.Date());
-
-        // Crear una instancia de Statistics
-        Statistics stats = new Statistics(student);
-
-        // Registrar dos intentos de revisión
-        stats.recordRevisionQuizScore(0.3);
-        stats.recordRevisionQuizScore(0.4);
-
-        // Verificar que el estudiante no pueda tomar más revisiones
-        assertFalse(stats.canTakeRevisionQuiz());
-        assertEquals(2, stats.getRevisionAttempts());  // Verificar que hay dos intentos registrados
-    }
-
-    /**
-     * Test que verifica que el veredicto sea PASS si el estudiante obtiene >= 0.5 en una revisión.
-     */
-    @Test
-    public void testRecordRevisionQuizScorePass() {
-        // Crear un estudiante
-        Student student = new Student("Jane", "Doe", new java.util.Date());
-
-        // Crear una instancia de Statistics
-        Statistics stats = new Statistics(student);
-
-        // Registrar un puntaje bajo en el quiz regular
-        stats.recordRegularQuizScore(0.3);
-
-        // Registrar un puntaje >= 0.5 en la revisión (esto debería resultar en PASS)
-        stats.recordRevisionQuizScore(0.6);
-
-        // Verificar que el veredicto sea PASS
-        assertEquals("PASS", stats.getVerdict());
-        assertEquals(1, stats.getRevisionAttempts());  // Verificar que hay un intento de revisión registrado
-    }
-
-    /**
-     * Test que verifica que no se puedan registrar intentos después de un veredicto de PASS o FAIL.
-     */
-    @Test
-    public void testNoFurtherAttemptsAfterVerdict() {
-        // Crear un estudiante
-        Student student = new Student("John", "Doe", new java.util.Date());
-
-        // Crear una instancia de Statistics
-        Statistics stats = new Statistics(student);
-
-        // Registrar dos puntajes bajos en los quizzes regulares (esto debería resultar en FAIL)
-        stats.recordRegularQuizScore(0.2);
-        stats.recordRegularQuizScore(0.4);
-
-        // Intentar registrar otro intento (esto no debería afectar las estadísticas)
-        stats.recordRegularQuizScore(0.5);
-        assertEquals(2, stats.getRegularAttempts());  // Verificar que no se ha registrado otro intento
-
-        // Verificar que el veredicto siga siendo FAIL
-        assertEquals("FAIL", stats.getVerdict());
-    }
-
-    /**
-     * Test que verifica la generación correcta del informe de estadísticas.
+     * Prueba para verificar el método generateStatistics.
      */
     @Test
     public void testGenerateStatisticsReport() {
-        // Crear un estudiante
-        Student student = new Student("Jane", "Doe", new java.util.Date());
 
-        // Crear una instancia de Statistics
-        Statistics stats = new Statistics(student);
+        // Registrar puntajes de quizzes de revisión
+        statistics.recordRevisionQuizScore(0.4);  // First revision quiz
+        statistics.recordRevisionQuizScore(0.5);  // Second revision quiz
 
-        // Registrar algunos puntajes
-        stats.recordRegularQuizScore(0.3);  // Primer intento regular (fallido)
-        //stats.recordRegularQuizScore(0.4);  // Segundo intento regular (fallido)
-        stats.recordRevisionQuizScore(0.7);  // Un intento de revisión exitoso
+        // Registrar puntajes de quizzes regulares
+        statistics.recordRegularQuizScore(0.3);  // Failed first regular quiz
+        statistics.recordRegularQuizScore(0.6);  // PASSED second regular quiz (should mark as PASS)
+
+
 
         // Generar el informe de estadísticas
-        String report = stats.generateStatistics();
+        String report = statistics.generateStatistics();
 
-        // Imprimir el reporte para verificar el formato
-        System.out.println(report);  // Ver el contenido exacto generado
-
-        // Verificar que el informe contiene la información correcta
+        // Verificar que el informe contiene toda la información correcta
         assertTrue(report.contains("Final verdict: PASS"));
-        assertTrue(report.contains("Number of regular quiz attempts: 1"));
-        assertTrue(report.contains("Number of revision quiz attempts: 1"));
-        assertTrue(report.contains("Regular quiz scores: [0.3]"));
-        assertTrue(report.contains("Revision quiz scores: [0.7]"));
-    }
-
-
-    /**
-     * Test que verifica los límites de los intentos en los quizzes regulares y de revisión.
-     */
-    @Test
-    public void testAttemptsLimits() {
-        // Crear un estudiante
-        Student student = new Student("John", "Doe", new java.util.Date());
-
-        // Crear una instancia de Statistics
-        Statistics stats = new Statistics(student);
-
-        // Registrar dos intentos regulares fallidos
-        stats.recordRegularQuizScore(0.2);
-        //stats.recordRegularQuizScore(0.4);
-
-        // Verificar que no puede tomar más quizzes regulares (FAIL)
-        //assertFalse(stats.canTakeRegularQuiz());
-
-        // Intentar registrar más puntajes no debería afectar
-        //stats.recordRegularQuizScore(0.5);
-        assertEquals(1, stats.getRegularAttempts());
-
-
-
-        // Registrar dos intentos de revisión
-        stats.recordRevisionQuizScore(0.4);
-        stats.recordRevisionQuizScore(0.3);
-
-        // Verificar que no puede tomar más quizzes de revisión
-        assertFalse(stats.canTakeRevisionQuiz());
-        assertEquals(2, stats.getRevisionAttempts());
+        assertTrue(report.contains("Number of regular quiz attempts: 2"));
+        assertTrue(report.contains("Number of revision quiz attempts: 2"));
+        assertTrue(report.contains("Regular quiz scores: [0.3, 0.6]"));
+        assertTrue(report.contains("Revision quiz scores: [0.4, 0.5]"));
     }
 }

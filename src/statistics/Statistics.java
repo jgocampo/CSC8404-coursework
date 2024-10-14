@@ -2,12 +2,15 @@ package statistics;
 
 import student.Student;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public final class Statistics {
     private final Student student;
     private final List<Double> regularQuizScores;
     private final List<Double> revisionQuizScores;
+    private final Set<String> seenQuestions;  // Track all questions seen in any quiz
     private int regularAttempts;
     private int revisionAttempts;
     private String verdict;
@@ -17,46 +20,62 @@ public final class Statistics {
         this.student = student;
         this.regularQuizScores = new ArrayList<>();
         this.revisionQuizScores = new ArrayList<>();
-        this.verdict = "TBD";  // TBD significa "To Be Determined"
+        this.seenQuestions = new HashSet<>();  // Keep track of all questions seen
+        this.verdict = "TBD";  // TBD until a final decision
     }
 
     public Student getStudent() {
-        return student;  // Esto proporciona acceso al estudiante desde las estadísticas
+        return student;
+    }
+    public String getVerdict() {
+        return verdict;
     }
 
-    // Registro de un puntaje de quiz regular
+    public int getRevisionAttempts(){
+        return revisionAttempts;
+    }
+
+    public int getRegularAttempts(){
+        return regularAttempts;
+    }
+
+    // Record score for regular quiz and update the final verdict
     public void recordRegularQuizScore(double score) {
         if ("PASS".equals(verdict) || "FAIL".equals(verdict)) {
-            return;  // No se permiten más intentos si ya se ha emitido un veredicto
+            return;  // No more attempts allowed if a verdict has been reached
         }
 
         regularQuizScores.add(score);
         regularAttempts++;
 
-        // Si el puntaje es >= 50%, el estudiante pasa
         if (score >= 0.5) {
             verdict = "PASS";
         } else if (regularAttempts >= 2) {
-            verdict = "FAIL";  // Si ha fallado dos veces, el veredicto es FAIL
+            verdict = "FAIL";  // Fail after two regular quiz failures
         }
     }
 
-    // Registro de un puntaje de quiz de revisión
+    // Record score for revision quiz but do not affect the final verdict
     public void recordRevisionQuizScore(double score) {
-        if ("PASS".equals(verdict) || "FAIL".equals(verdict) || revisionAttempts >= 2) {
-            return;  // No se permiten más revisiones si ya se ha emitido un veredicto o ha alcanzado el límite
+        if (revisionAttempts >= 2 || "PASS".equals(verdict) || "FAIL".equals(verdict)) {
+            return;  // No more revision attempts if limit reached or verdict given
         }
 
         revisionQuizScores.add(score);
         revisionAttempts++;
-
-        // Si el puntaje es >= 50%, el estudiante pasa
-        if (score >= 0.5) {
-            verdict = "PASS";
-        }
     }
 
-    // Genera un informe de las estadísticas del estudiante
+    // Track the questions that the student has seen
+    public void recordSeenQuestions(List<String> questions) {
+        seenQuestions.addAll(questions);
+    }
+
+    // Check if the student has already seen a given question
+    public boolean hasSeenQuestion(String question) {
+        return seenQuestions.contains(question);
+    }
+
+    // Generate a report of the student statistics
     public String generateStatistics() {
         StringBuilder report = new StringBuilder();
         report.append("Statistics for student: ").append(student.getName()).append("\n");
@@ -65,32 +84,17 @@ public final class Statistics {
         report.append("Number of revision quiz attempts: ").append(revisionAttempts).append("\n");
         report.append("Regular quiz scores: ").append(regularQuizScores).append("\n");
         report.append("Revision quiz scores: ").append(revisionQuizScores).append("\n");
-
         return report.toString();
     }
 
-    // Verifica si el estudiante puede tomar más quizzes regulares
     public boolean canTakeRegularQuiz() {
-        return "TBD".equals(verdict);
+        return "TBD".equals(verdict);  // Only if no final verdict
     }
 
-    // Verifica si el estudiante puede tomar más quizzes de revisión
     public boolean canTakeRevisionQuiz() {
-        return "TBD".equals(verdict) && revisionAttempts < 2;
-    }
-
-    // Obtiene el veredicto final
-    public String getVerdict() {
-        return verdict;
-    }
-
-    public int getRegularAttempts(){
-        return regularAttempts;
-    }
-
-    public int getRevisionAttempts(){
-        return revisionAttempts;
+        return "TBD".equals(verdict) && revisionAttempts < 2;  // Max 2 revision attempts
     }
 
 
 }
+

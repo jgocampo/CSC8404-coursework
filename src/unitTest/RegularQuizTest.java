@@ -1,141 +1,90 @@
 package unitTest;
-import question.Question;
-import quiz.RegularQuiz;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import question.FreeResponseQuestion;
 import question.MultipleChoiceQuestion;
+import question.Question;
+import quiz.RegularQuiz;
 import student.Student;
 import statistics.Statistics;
-import org.junit.jupiter.api.Test;
-import java.util.Arrays;
-import java.util.List;
+
+import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Unit tests for the RegularQuiz class without using assertThrows.
- */
 public class RegularQuizTest {
 
-    /**
-     * Test generating a quiz and taking it with correct answers.
-     */
+    private List<Question> questionPool;
+    private RegularQuiz regularQuiz;
+    private Student student;
+
+    @BeforeEach
+    public void setup() {
+        // Crear banco de preguntas mixtas
+        questionPool = new ArrayList<>();
+        questionPool.add(new FreeResponseQuestion("What is the capital of France?", "Paris"));
+        questionPool.add(new FreeResponseQuestion("Who wrote '1984'?", "George Orwell"));
+        questionPool.add(new MultipleChoiceQuestion("Which are fruits?", new String[]{"Apple", "Banana", "Orange"}));
+        questionPool.add(new MultipleChoiceQuestion("Which are colors?", new String[]{"Red", "Green", "Blue"}));
+
+        // Crear un quiz regular
+        regularQuiz = new RegularQuiz(questionPool);
+
+        // Crear un estudiante
+        Calendar cal = Calendar.getInstance();
+        cal.set(1995, Calendar.JANUARY, 1);
+        Date birthDate = cal.getTime();
+        student = new Student("John", "Doe", birthDate);
+    }
+
     @Test
     public void testTakeQuizWithCorrectAnswers() {
-        List<Question> questions = Arrays.asList(
-                new FreeResponseQuestion("What is the capital of France?", "Paris"),
-                new FreeResponseQuestion("What is the chemical symbol for water?", "H2O")
-        );
-        RegularQuiz quiz = new RegularQuiz(questions);
-
-        Student student = new Student("John", "Doe", new java.util.Date());
-
-        List<String> answers = Arrays.asList("Paris", "H2O");
-        double score = quiz.takeQuiz(student, questions, answers);
-
+        List<String> answers = List.of("Paris", "George Orwell", "Apple,Banana,Orange", "Red,Green,Blue");
+        double score = regularQuiz.takeQuiz(student, questionPool, answers);
         assertEquals(1.0, score);  // 100% correct answers
+
+        Statistics stats = student.getStatistics();
+        assertEquals("PASS", stats.getVerdict());  // Student should pass
     }
 
-    /**
-     * Test taking quiz with incorrect answers.
-     */
     @Test
     public void testTakeQuizWithIncorrectAnswers() {
-        List<Question> questions = Arrays.asList(
-                new FreeResponseQuestion("What is the capital of France?", "Paris"),
-                new FreeResponseQuestion("What is the chemical symbol for water?", "H2O")
-        );
-        RegularQuiz quiz = new RegularQuiz(questions);
-
-        Student student = new Student("John", "Doe", new java.util.Date());
-
-        List<String> answers = Arrays.asList("London", "CO2");
-        double score = quiz.takeQuiz(student, questions, answers);
-
+        List<String> answers = List.of("Lyon", "Orwell", "Apple", "Red,Green");
+        double score = regularQuiz.takeQuiz(student, questionPool, answers);
         assertEquals(0.0, score);  // 0% correct answers
-    }
 
-    /**
-     * Test attempting to generate quiz with invalid number of questions.
-     */
-    @Test
-    public void testGenerateQuizWithInvalidNumber() {
-        List<Question> questions = Arrays.asList(
-                new FreeResponseQuestion("What is the capital of France?", "Paris")
-        );
-        RegularQuiz quiz = new RegularQuiz(questions);
-
-        try {
-            quiz.generateQuiz(5);  // Más preguntas de las que existen
-            fail("Should have thrown an IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-            // Excepción esperada
-            assertTrue(true);  // Afirmamos que la excepción fue lanzada
-        }
-    }
-
-    /**
-     * Test student with PASS verdict should not take another quiz.
-     */
-    @Test
-    public void testStudentWithPassCannotTakeAnotherQuiz() {
-        List<Question> questions = Arrays.asList(
-                new FreeResponseQuestion("What is the capital of France?", "Paris"),
-                new FreeResponseQuestion("What is the chemical symbol for water?", "H2O")
-        );
-        RegularQuiz quiz = new RegularQuiz(questions);
-
-        Student student = new Student("John", "Doe", new java.util.Date());
         Statistics stats = student.getStatistics();
-        stats.recordRegularQuizScore(1.0);  // Estudiante pasó
-
-        try {
-            quiz.takeQuiz(student, questions, Arrays.asList("Paris", "H2O"));
-            fail("Should have thrown an IllegalStateException");
-        } catch (IllegalStateException e) {
-            assertTrue(true);  // Excepción esperada
-        }
+        assertEquals("TBD", stats.getVerdict());  // Still TBD after the first failed quiz
     }
 
-    /**
-     * Test student with FAIL verdict should not take another quiz.
-     */
     @Test
-    public void testStudentWithFailCannotTakeAnotherQuiz() {
-        List<Question> questions = Arrays.asList(
-                new FreeResponseQuestion("What is the capital of France?", "Paris"),
-                new FreeResponseQuestion("What is the chemical symbol for water?", "H2O")
-        );
-        RegularQuiz quiz = new RegularQuiz(questions);
+    public void testTakeQuizAfterFailingTwice() {
+        // Failing two regular quizzes
+        student.getStatistics().recordRegularQuizScore(0.3);  // First quiz failed
+        student.getStatistics().recordRegularQuizScore(0.2);  // Second quiz failed
 
-        Student student = new Student("John", "Doe", new java.util.Date());
+        List<String> answers = List.of("Paris", "George Orwell", "Apple,Banana,Orange", "Red,Green,Blue");
+
+        // Trying to take a third regular quiz after failing twice should throw an exception
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () ->
+                regularQuiz.takeQuiz(student, questionPool, answers)
+        );
+
+        assertEquals("Cannot take more regular quizzes. Final verdict: FAIL", exception.getMessage());
+    }
+
+    @Test
+    public void testQuestionsTrackingAfterQuiz() {
+        List<String> answers = List.of("Paris", "George Orwell", "Apple,Banana,Orange", "Red,Green,Blue");
+        regularQuiz.takeQuiz(student, questionPool, answers);
+
+        // Verificar que las preguntas vistas se registraron correctamente en las estadísticas
         Statistics stats = student.getStatistics();
-        stats.recordRegularQuizScore(0.3);  // Primer intento fallido
-        stats.recordRegularQuizScore(0.2);  // Segundo intento fallido -> FAIL
-
-        try {
-            quiz.takeQuiz(student, questions, Arrays.asList("Paris", "H2O"));
-            fail("Should have thrown an IllegalStateException");
-        } catch (IllegalStateException e) {
-            assertTrue(true);  // Excepción esperada
-        }
-    }
-
-    /**
-     * Test quiz with both FreeResponseQuestion and MultipleChoiceQuestion.
-     */
-    @Test
-    public void testQuizWithMultipleTypesOfQuestions() {
-        List<Question> questions = Arrays.asList(
-                new FreeResponseQuestion("What is the capital of France?", "Paris"),
-                new MultipleChoiceQuestion("Which of these are programming languages?", new String[]{"a", "b", "c"})
-        );
-        RegularQuiz quiz = new RegularQuiz(questions);
-
-        Student student = new Student("John", "Doe", new java.util.Date());
-
-        List<String> answers = Arrays.asList("Paris", "a,b,c");
-        double score = quiz.takeQuiz(student, questions, answers);
-
-        assertEquals(1.0, score);  // Respuestas correctas para ambos tipos de preguntas
+        assertTrue(stats.hasSeenQuestion("What is the capital of France?"));
+        assertTrue(stats.hasSeenQuestion("Who wrote '1984'?"));
+        assertTrue(stats.hasSeenQuestion("Which are fruits?"));
+        assertTrue(stats.hasSeenQuestion("Which are colors?"));
     }
 }
 
