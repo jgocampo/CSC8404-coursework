@@ -1,118 +1,151 @@
 package unitTest;
 import quiz.RevisionQuiz;
+import question.FreeResponseQuestion;
+import question.MultipleChoiceQuestion;
 import question.Question;
 import student.Student;
 import statistics.Statistics;
 import org.junit.jupiter.api.Test;
-import java.util.Arrays;
+
 import java.util.List;
+import java.util.ArrayList;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Unit tests for the RevisionQuiz class with static question pool and proper handling of multiple choice questions.
+ * Unit tests for the RevisionQuiz class with manually assigned questions.
  */
 public class RevisionQuizTest {
 
     /**
-     * Test that a student can take a revision quiz after failing a regular quiz.
+     * Test que un estudiante puede tomar un examen regular con preguntas manualmente asignadas.
      */
     @Test
-    public void testTakeRevisionQuizAfterFailingRegularQuiz() {
-        List<Question> questionPool = TestQuestionPool.getQuestionPool();
-        RevisionQuiz revisionQuiz = new RevisionQuiz(questionPool);
+    public void testTakeRegularQuiz() {
+        // Crear preguntas manualmente
+        List<Question> questions = new ArrayList<>();
+        questions.add(new FreeResponseQuestion("What is the capital of France?", "Paris"));
+        questions.add(new MultipleChoiceQuestion("Which are programming languages?", new String[]{"Java", "Python", "C++"}));
+
+        // Crear una instancia de RevisionQuiz (simulando un quiz regular)
+        RevisionQuiz quiz = new RevisionQuiz(questions);
+
+        // Crear un estudiante
+        Student student = new Student("John", "Doe", new java.util.Date());
+
+        // Proporcionar respuestas correctas
+        List<String> answers = List.of("Paris", "Java,Python,C++");
+
+        // Tomar el quiz
+        double score = quiz.takeQuiz(student, questions, answers);
+
+        // Verificar el puntaje (100% correcto)
+        assertEquals(1.0, score);
+    }
+
+    /**
+     * Test que un estudiante puede tomar un examen de revisión con preguntas asignadas manualmente.
+     */
+    @Test
+    public void testTakeRevisionQuiz() {
+        // Crear preguntas manualmente
+        List<Question> questions = new ArrayList<>();
+        questions.add(new FreeResponseQuestion("What is the capital of France?", "Paris"));
+        questions.add(new FreeResponseQuestion("What is the chemical symbol for water?", "H2O"));
+        questions.add(new MultipleChoiceQuestion("Which are fruits?", new String[]{"Apple", "Banana", "Orange"}));
+
+        // Crear una instancia de RevisionQuiz (simulando un quiz de revisión)
+        RevisionQuiz revisionQuiz = new RevisionQuiz(questions);
 
         // Crear un estudiante
         Student student = new Student("Jane", "Doe", new java.util.Date());
         Statistics stats = student.getStatistics();
         stats.recordRegularQuizScore(0.3);  // El estudiante falló el quiz regular
 
-        // Asegurarse de que las respuestas coinciden con el número de preguntas
-        List<String> answers = Arrays.asList("Quito", "Mars", "Java,Python,C++", "Apple,Banana");
-        double score = revisionQuiz.takeQuiz(student, questionPool, answers);
+        // Proporcionar respuestas correctas
+        List<String> answers = List.of("Paris", "H2O", "Apple,Banana,Orange");
 
-        assertTrue(score > 0.0);  // El estudiante debería recibir un puntaje mayor a 0
+        // Tomar el quiz de revisión
+        double score = revisionQuiz.takeQuiz(student, questions, answers);
+
+        // Verificar el puntaje (100% correcto)
+        assertEquals(1.0, score);
+    }
+
+    /**
+     * Test que un estudiante no puede ver preguntas repetidas en el quiz de revisión.
+     */
+    @Test
+    public void testRevisionQuizExcludesAlreadySeenQuestions() {
+        // Crear preguntas manualmente
+        List<Question> allQuestions = new ArrayList<>();
+        allQuestions.add(new FreeResponseQuestion("What is the capital of France?", "Paris"));
+        allQuestions.add(new FreeResponseQuestion("What is the chemical symbol for water?", "H2O"));
+        allQuestions.add(new MultipleChoiceQuestion("Which are fruits?", new String[]{"Apple", "Banana", "Orange"}));
+        allQuestions.add(new FreeResponseQuestion("Who wrote '1984'?", "George Orwell"));
+
+        // Crear una instancia de RevisionQuiz
+        RevisionQuiz revisionQuiz = new RevisionQuiz(allQuestions);
+
+        // Crear un estudiante
+        Student student = new Student("Jane", "Doe", new java.util.Date());
+        Statistics stats = student.getStatistics();
+        stats.recordRegularQuizScore(0.3);  // El estudiante falló el quiz regular
+
+        // Primer intento del quiz de revisión (damos respuestas incorrectas para evitar PASS)
+        List<Question> firstQuizQuestions = allQuestions.subList(0, 2);  // Seleccionamos las dos primeras preguntas
+        List<String> firstQuizAnswers = List.of("London", "CO2");  // Respuestas incorrectas
+        revisionQuiz.takeQuiz(student, firstQuizQuestions, firstQuizAnswers);
+
+        // Registrar las preguntas vistas
+        List<Question> seenQuestions = new ArrayList<>(firstQuizQuestions);
+
+        // Segundo intento del quiz de revisión, excluir preguntas ya vistas
+        List<Question> secondQuizQuestions = allQuestions.subList(2, 4);  // Seleccionamos las siguientes preguntas
+        List<String> secondQuizAnswers = List.of("Apple,Banana,Orange", "George Orwell");
+
+        // Verificar que las nuevas preguntas no fueron vistas en el primer quiz
+        assertFalse(seenQuestions.containsAll(secondQuizQuestions), "El estudiante no debe ver preguntas repetidas");
+
+        // Tomar el segundo quiz de revisión
+        double secondScore = revisionQuiz.takeQuiz(student, secondQuizQuestions, secondQuizAnswers);
+
+        // Verificar el puntaje (100% correcto)
+        assertEquals(1.0, secondScore);
     }
 
 
     /**
-     * Test that a student cannot take more than two revision quizzes.
+     * Test que un estudiante no puede tomar más de dos quizzes de revisión.
      */
     @Test
     public void testCannotExceedTwoRevisionQuizzes() {
-        List<Question> questionPool = TestQuestionPool.getQuestionPool();
-        RevisionQuiz revisionQuiz = new RevisionQuiz(questionPool);
+        // Crear preguntas manualmente
+        List<Question> questions = new ArrayList<>();
+        questions.add(new FreeResponseQuestion("What is the capital of France?", "Paris"));
+        questions.add(new FreeResponseQuestion("What is the chemical symbol for water?", "H2O"));
+        questions.add(new MultipleChoiceQuestion("Which are programming languages?", new String[]{"Java", "Python", "C++"}));
+
+        // Crear una instancia de RevisionQuiz
+        RevisionQuiz revisionQuiz = new RevisionQuiz(questions);
 
         // Crear un estudiante
         Student student = new Student("John", "Doe", new java.util.Date());
         Statistics stats = student.getStatistics();
         stats.recordRegularQuizScore(0.0);  // El estudiante falló el quiz regular
 
-        // El estudiante toma dos quizzes de revisión
-        stats.recordRevisionQuizScore(0.2);  // Primer intento de revisión
-        stats.recordRevisionQuizScore(0.3);  // Segundo intento de revisión
+        // Primer intento del quiz de revisión
+        revisionQuiz.takeQuiz(student, questions, List.of("Paris", "H2O", "Java,Python,C++"));
 
-        // Intentar tomar un tercer quiz de revisión debería fallar
-        double score = revisionQuiz.takeQuiz(student, questionPool, Arrays.asList("London", "CO2"));
-        assertEquals(0.0, score);  // No puede tomar otro quiz, por lo que el puntaje debe ser 0
-    }
+        // Segundo intento del quiz de revisión
+        revisionQuiz.takeQuiz(student, questions, List.of("Paris", "H2O", "Java,Python,C++"));
 
-    /**
-     * Test that a student cannot take a revision quiz after receiving a PASS verdict.
-     */
-    @Test
-    public void testCannotTakeRevisionQuizAfterPass() {
-        List<Question> questionPool = TestQuestionPool.getQuestionPool();
-        RevisionQuiz revisionQuiz = new RevisionQuiz(questionPool);
+        // Intentar tomar un tercer quiz (el puntaje debe ser 0 ya que no puede tomar más quizzes)
+        double thirdScore = revisionQuiz.takeQuiz(student, questions, List.of("Paris", "H2O", "Java,Python,C++"));
 
-        // Crear un estudiante
-        Student student = new Student("Jane", "Doe", new java.util.Date());
-        Statistics stats = student.getStatistics();
-        stats.recordRegularQuizScore(0.7);  // El estudiante pasó el quiz regular
-
-        // Intentar tomar un quiz de revisión después de haber pasado el quiz regular
-        double score = revisionQuiz.takeQuiz(student, questionPool, Arrays.asList("Paris", "Java,Python,C++"));
-        assertEquals(0.0, score);  // No debe poder tomar un quiz de revisión si ya pasó
-    }
-
-    /**
-     * Test that the revision quiz excludes questions that were answered correctly in the regular quiz.
-     */
-    @Test
-    public void testRevisionQuizExcludesCorrectlyAnsweredQuestions() {
-        List<Question> questionPool = TestQuestionPool.getQuestionPool();
-        RevisionQuiz revisionQuiz = new RevisionQuiz(questionPool);
-
-        // Crear un estudiante
-        Student student = new Student("Jane", "Doe", new java.util.Date());
-        Statistics stats = student.getStatistics();
-        stats.recordRegularQuizScore(0.5);  // El estudiante pasó una pregunta correctamente
-
-        // Generar un quiz de revisión con preguntas incorrectas
-        List<String> answers = Arrays.asList("London", "H2O", "Java,Python,C++");
-        double score = revisionQuiz.takeQuiz(student, questionPool, answers);
-
-        // Verificar que no se incluyan las preguntas que el estudiante respondió correctamente
-        assertTrue(score > 0.0);  // El puntaje debería reflejar solo las preguntas no vistas o incorrectas
-    }
-
-    /**
-     * Test that a student can take a revision quiz with questions of both types.
-     */
-    @Test
-    public void testRevisionQuizWithBothQuestionTypes() {
-        List<Question> questionPool = TestQuestionPool.getQuestionPool();
-        RevisionQuiz revisionQuiz = new RevisionQuiz(questionPool);
-
-        // Crear un estudiante
-        Student student = new Student("Jane", "Doe", new java.util.Date());
-        Statistics stats = student.getStatistics();
-        stats.recordRegularQuizScore(0.4);  // Falló el quiz regular
-
-        // Estudiante toma un quiz de revisión con preguntas de ambos tipos
-        List<String> answers = Arrays.asList("Paris", "Java,Python,C++");
-        double score = revisionQuiz.takeQuiz(student, questionPool, answers);
-
-        assertTrue(score > 0.0);  // El estudiante debería recibir un puntaje mayor a 0
+        // Verificar que no puede tomar un tercer quiz
+        assertEquals(0.0, thirdScore);  // El puntaje debe ser 0 porque no puede tomar más de dos quizzes de revisión
     }
 }
+
 

@@ -20,6 +20,10 @@ public final class Statistics {
         this.verdict = "TBD";  // TBD significa "To Be Determined"
     }
 
+    public Student getStudent() {
+        return student;  // Esto proporciona acceso al estudiante desde las estadísticas
+    }
+
     // Registro de un puntaje de quiz regular
     public void recordRegularQuizScore(double score) {
         if ("PASS".equals(verdict) || "FAIL".equals(verdict)) {
