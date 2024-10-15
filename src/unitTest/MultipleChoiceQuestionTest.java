@@ -12,7 +12,7 @@ public class MultipleChoiceQuestionTest {
      * Test correct answer with literals in different orders.
      */
     @Test
-    public void testCorrectAnswerWithLiterals() {
+    public void testCorrectAnswers() {
         MultipleChoiceQuestion question = new MultipleChoiceQuestion(
                 "Which of the following are prime numbers?", new String[]{"a", "b", "c"}
         );
@@ -26,7 +26,7 @@ public class MultipleChoiceQuestionTest {
      * Test incorrect answer with missing or extra literals.
      */
     @Test
-    public void testIncorrectAnswerWithLiterals() {
+    public void testIncorrectAnswers() {
         MultipleChoiceQuestion question = new MultipleChoiceQuestion(
                 "Which of the following are prime numbers?", new String[]{"a", "b", "c"}
         );

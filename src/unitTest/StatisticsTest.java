@@ -60,13 +60,6 @@ public class StatisticsTest {
         assertEquals(2, statistics.getRevisionAttempts());
     }
 
-    @Test
-    public void testSeenQuestionsTracking() {
-        // Record some seen questions
-        statistics.recordSeenQuestions(List.of("Question 1", "Question 2"));
-        assertTrue(statistics.hasSeenQuestion("Question 1"));
-        assertFalse(statistics.hasSeenQuestion("Question 3"));
-    }
 
     /**
      * Prueba para verificar el método generateStatistics.

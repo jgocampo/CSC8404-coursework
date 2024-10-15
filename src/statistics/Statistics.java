@@ -65,15 +65,14 @@ public final class Statistics {
         revisionAttempts++;
     }
 
-    // Track the questions that the student has seen
-    public void recordSeenQuestions(List<String> questions) {
-        seenQuestions.addAll(questions);
+    public boolean hasSeenQuestion(String questionFormulation) {
+        return seenQuestions.contains(questionFormulation);
     }
 
-    // Check if the student has already seen a given question
-    public boolean hasSeenQuestion(String question) {
-        return seenQuestions.contains(question);
+    public void recordSeenQuestion(String questionFormulation) {
+        seenQuestions.add(questionFormulation);
     }
+
 
     // Generate a report of the student statistics
     public String generateStatistics() {

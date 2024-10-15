@@ -45,9 +45,12 @@ public final class RevisionQuiz extends QuizFactory {
         stats.recordRevisionQuizScore(score);
 
         // Registrar las preguntas vistas para evitar repetición en el futuro
-        stats.recordSeenQuestions(questions.stream().map(Question::getQuestionFormulation).toList());
+        for (Question question : questions) {
+            stats.recordSeenQuestion(question.getQuestionFormulation());
+        }
 
         // Retornar el puntaje obtenido en el quiz de revisión
         return score;
     }
+
 }

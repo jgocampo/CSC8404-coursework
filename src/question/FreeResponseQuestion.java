@@ -49,8 +49,8 @@ public class FreeResponseQuestion implements Question {
      * The comparison is case-insensitive, ignores leading and trailing spaces, and treats
      * multiple spaces as a single space.
      *
-     * @param answer the student's answer to check
-     * @return {@code true} if the answer is correct, {@code false} otherwise
+     * @param answer the student answer to check
+     * @return true or false if the question is correct or not.
      */
     @Override
     public boolean checkAnswer(String answer) {
@@ -59,8 +59,8 @@ public class FreeResponseQuestion implements Question {
     }
 
     /**
-     * Normalizes the answer by trimming it, replacing multiple spaces with a single space,
-     * and converting it to lowercase to make the comparison case-insensitive.
+     * Method to normalize the answer by trimming it, replacing multiple spaces with a single space,
+     * and converting it to lowercase to make the comparison.
      *
      * @param answer the answer to normalize
      * @return the normalized answer
