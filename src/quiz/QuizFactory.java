@@ -40,33 +40,92 @@ public abstract class QuizFactory implements Quiz {
     @Override
     public Quiz generateQuiz(int numberOfQuestions) {
         if (numberOfQuestions < 1 || numberOfQuestions > questionPool.size()) {
-            throw new IllegalArgumentException("Invalid number of questions.");
+            throw new IllegalArgumentException("Invalid number of questions. Must be between 1 and " + questionPool.size());
         }
 
-        Collections.shuffle(questionPool);  // Shuffle to mix up the questions
-        List<Question> selectedQuestions = new ArrayList<>(questionPool.subList(0, numberOfQuestions));
+        // Lista para almacenar las preguntas seleccionadas
+        List<Question> selectedQuestions = new ArrayList<>();
+        List<Question> freeResponseQuestions = new ArrayList<>();
+        List<Question> multipleChoiceQuestions = new ArrayList<>();
+
+        // Separar preguntas en FreeResponse y MultipleChoice
+        for (Question question : questionPool) {
+            if (question instanceof question.FreeResponseQuestion) {
+                freeResponseQuestions.add(question);
+            } else if (question instanceof question.MultipleChoiceQuestion) {
+                multipleChoiceQuestions.add(question);
+            }
+        }
+
+        // Verificar que haya suficientes preguntas de ambos tipos
+        if (freeResponseQuestions.isEmpty() || multipleChoiceQuestions.isEmpty()) {
+            throw new IllegalArgumentException("Question pool must contain both FreeResponse and MultipleChoice questions.");
+        }
+
+        // Seleccionar preguntas: la mitad FreeResponse y la mitad MultipleChoice
+        int halfQuestions = numberOfQuestions / 2;
+        Collections.shuffle(freeResponseQuestions);
+        Collections.shuffle(multipleChoiceQuestions);
+
+        selectedQuestions.addAll(freeResponseQuestions.subList(0, Math.min(halfQuestions, freeResponseQuestions.size())));
+        selectedQuestions.addAll(multipleChoiceQuestions.subList(0, Math.min(halfQuestions, multipleChoiceQuestions.size())));
+
         return createQuizInstance(selectedQuestions);
     }
 
     /**
-     * Generates a revision quiz that only includes questions the student got wrong or hasn't answered before.
+     * Generates a revision quiz that only includes questions the student hasn't seen before or has answered incorrectly.
      * If there aren't enough questions available for the revision quiz, an exception is thrown.
      *
      * @param student The student who is taking the quiz.
      * @param numberOfQuestions The number of questions in the quiz.
      * @return A new quiz instance with revision questions.
-     * @throws IllegalArgumentException if there are not enough unanswered or incorrect questions.
+     * @throws IllegalArgumentException if there are not enough unseen or incorrectly answered questions.
      */
     @Override
     public Quiz revise(Student student, int numberOfQuestions) {
-        List<Question> revisionQuestions = getUnansweredOrIncorrectQuestions(student); // Get questions student hasn't answered or got wrong
-        Collections.shuffle(revisionQuestions);  // Shuffle to avoid giving them in the same order
-
-        if (revisionQuestions.size() < numberOfQuestions) {
-            throw new IllegalArgumentException("Not enough questions available for revision.");
+        if (student == null) {
+            throw new IllegalArgumentException("Student cannot be null.");
         }
 
-        return createRevisionQuizInstance(revisionQuestions.subList(0, numberOfQuestions), student);
+        if (!student.getStatistics().canTakeRevisionQuiz()) {
+            throw new IllegalStateException("Cannot take more revision quizzes. Final verdict: " + student.getStatistics().getVerdict());
+        }
+
+        List<Question> unseenOrIncorrectQuestions = selectUnseenOrIncorrectQuestions(numberOfQuestions, student);
+
+        if (unseenOrIncorrectQuestions.size() < numberOfQuestions) {
+            throw new IllegalArgumentException("Not enough unseen or incorrectly answered questions for revision.");
+        }
+
+        return createRevisionQuizInstance(unseenOrIncorrectQuestions, student);
+    }
+
+    /**
+     * Selects questions that the student has either not seen or answered incorrectly.
+     * For revision quizzes, these are the questions that the student got wrong in previous attempts.
+     *
+     * @param numberOfQuestions The number of questions to select.
+     * @param student The student for whom the revision quiz is being generated.
+     * @return A list of unseen or incorrectly answered questions.
+     */
+    protected List<Question> selectUnseenOrIncorrectQuestions(int numberOfQuestions, Student student) {
+        List<Question> unseenOrIncorrectQuestions = new ArrayList<>();
+
+        // Obtener el historial de preguntas vistas y respondidas incorrectamente
+        List<Question> history = studentHistory.getOrDefault(student, new ArrayList<>());
+        for (Question question : questionPool) {
+            if (!history.contains(question)) {
+                unseenOrIncorrectQuestions.add(question);  // Añadir preguntas no vistas
+            }
+        }
+
+        if (unseenOrIncorrectQuestions.size() < numberOfQuestions) {
+            throw new IllegalArgumentException("Not enough unseen or incorrectly answered questions.");
+        }
+
+        Collections.shuffle(unseenOrIncorrectQuestions);  // Barajar las preguntas
+        return unseenOrIncorrectQuestions.subList(0, numberOfQuestions);
     }
 
     /**
@@ -86,25 +145,11 @@ public abstract class QuizFactory implements Quiz {
      */
     protected abstract Quiz createRevisionQuizInstance(List<Question> revisionQuestions, Student student);
 
-    /**
-     * Retrieves a list of unanswered or incorrect questions for a given student. It checks the student's
-     * quiz history and returns only the questions they haven't answered correctly.
-     *
-     * @param student The student whose unanswered or incorrect questions are being retrieved.
-     * @return A list of questions that the student has not answered or got incorrect in previous quizzes.
-     */
-    protected List<Question> getUnansweredOrIncorrectQuestions(Student student) {
-        List<Question> history = studentHistory.getOrDefault(student, new ArrayList<>());
-        List<Question> unansweredOrIncorrect = new ArrayList<>();
-
-        // Go through the entire question pool and add questions not yet seen by the student
-        for (Question question : questionPool) {
-            if (!history.contains(question)) {
-                unansweredOrIncorrect.add(question);
-            }
-        }
-
-        return unansweredOrIncorrect;
+    // Registrar preguntas vistas en el historial del estudiante
+    protected void recordSeenQuestions(Student student, List<Question> seenQuestions) {
+        studentHistory.putIfAbsent(student, new ArrayList<>());
+        studentHistory.get(student).addAll(seenQuestions);
     }
 }
+
 

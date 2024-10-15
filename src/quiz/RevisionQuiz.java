@@ -7,7 +7,9 @@ import java.util.List;
 
 public final class RevisionQuiz extends QuizFactory {
 
-    public RevisionQuiz(List<Question> questionPool) {
+
+
+    public RevisionQuiz(List<Question> questionPool, Student student) {
         super(questionPool);
     }
 
@@ -18,17 +20,14 @@ public final class RevisionQuiz extends QuizFactory {
 
     @Override
     protected Quiz createRevisionQuizInstance(List<Question> revisionQuestions, Student student) {
-        return new RevisionQuiz(revisionQuestions);  // Devuelve una nueva instancia de quiz de revisión con las preguntas seleccionadas
+        return new RevisionQuiz(revisionQuestions, student);  // Devuelve una nueva instancia de quiz de revisión con las preguntas seleccionadas
     }
 
     @Override
     public double takeQuiz(Student student, List<Question> questions, List<String> answers) {
-        // Obtener las estadísticas del estudiante
-        Statistics stats = student.getStatistics();
-
-        // Verificar si el estudiante es elegible para tomar un quiz de revisión
-        if (!stats.canTakeRevisionQuiz()) {
-            throw new IllegalStateException("Cannot take more revision quizzes. Final verdict: " + stats.getVerdict());
+        // Verificar si el estudiante puede tomar un quiz de revisión
+        if (!student.getStatistics().canTakeRevisionQuiz()) {
+            throw new IllegalStateException("Cannot take more revision quizzes. Final verdict: " + student.getStatistics().getVerdict());
         }
 
         // Calcular el puntaje del quiz de revisión
@@ -42,14 +41,11 @@ public final class RevisionQuiz extends QuizFactory {
         double score = (double) correctAnswers / questions.size();
 
         // Registrar el puntaje en las estadísticas (no afecta el veredicto)
-        stats.recordRevisionQuizScore(score);
+        student.getStatistics().recordRevisionQuizScore(score);
 
-        // Registrar las preguntas vistas para evitar repetición en el futuro
-        for (Question question : questions) {
-            stats.recordSeenQuestion(question.getQuestionFormulation());
-        }
+        // Registrar las preguntas vistas
+        recordSeenQuestions(student, questions);
 
-        // Retornar el puntaje obtenido en el quiz de revisión
         return score;
     }
 

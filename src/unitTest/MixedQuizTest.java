@@ -53,7 +53,7 @@ public class MixedQuizTest {
 
         // Crear RegularQuiz y RevisionQuiz con el mismo banco de preguntas
         regularQuiz = new RegularQuiz(questionPool);
-        revisionQuiz = new RevisionQuiz(questionPool);
+        revisionQuiz = new RevisionQuiz(questionPool, student);
 
         // Crear un estudiante
         Calendar cal = Calendar.getInstance();

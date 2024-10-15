@@ -29,22 +29,20 @@ public final class RegularQuiz extends QuizFactory {
             throw new IllegalStateException("Student cannot take more regular quizzes. Final verdict: " + stats.getVerdict());
         }
 
-        // Registrar las preguntas vistas
-        for (Question question : questions) {
-            stats.recordSeenQuestion(question.getQuestionFormulation());
-        }
-
-        // Calcular el puntaje basado en las respuestas correctas
         int correctAnswers = 0;
         for (int i = 0; i < questions.size(); i++) {
             if (questions.get(i).checkAnswer(answers.get(i))) {
                 correctAnswers++;
             }
         }
+
         double score = (double) correctAnswers / questions.size();
 
-        // Registrar el puntaje en las estadísticas
-        stats.recordRegularQuizScore(score);
+        // Registrar las preguntas vistas
+        recordSeenQuestions(student, questions);
+
+        // Registrar el puntaje en las estadísticas del estudiante
+        student.getStatistics().recordRegularQuizScore(score);
 
         return score;
     }
