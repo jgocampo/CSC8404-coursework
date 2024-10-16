@@ -13,7 +13,7 @@ public abstract class QuizFactory implements Quiz {
     // A list of questions used in all quizzes
     protected final List<Question> questionPool;
     // Tracks the questions each student has already seen
-    protected final Map<Student, List<Question>> studentHistory;
+    protected   Map<Student, List<Question>> studentHistory;
 
     /**
      * Constructor for QuizFactory. Takes a list of questions as input and initializes the quiz system.
@@ -43,35 +43,12 @@ public abstract class QuizFactory implements Quiz {
             throw new IllegalArgumentException("Invalid number of questions. Must be between 1 and " + questionPool.size());
         }
 
-        // Lista para almacenar las preguntas seleccionadas
-        List<Question> selectedQuestions = new ArrayList<>();
-        List<Question> freeResponseQuestions = new ArrayList<>();
-        List<Question> multipleChoiceQuestions = new ArrayList<>();
-
-        // Separar preguntas en FreeResponse y MultipleChoice
-        for (Question question : questionPool) {
-            if (question instanceof question.FreeResponseQuestion) {
-                freeResponseQuestions.add(question);
-            } else if (question instanceof question.MultipleChoiceQuestion) {
-                multipleChoiceQuestions.add(question);
-            }
-        }
-
-        // Verificar que haya suficientes preguntas de ambos tipos
-        if (freeResponseQuestions.isEmpty() || multipleChoiceQuestions.isEmpty()) {
-            throw new IllegalArgumentException("Question pool must contain both FreeResponse and MultipleChoice questions.");
-        }
-
-        // Seleccionar preguntas: la mitad FreeResponse y la mitad MultipleChoice
-        int halfQuestions = numberOfQuestions / 2;
-        Collections.shuffle(freeResponseQuestions);
-        Collections.shuffle(multipleChoiceQuestions);
-
-        selectedQuestions.addAll(freeResponseQuestions.subList(0, Math.min(halfQuestions, freeResponseQuestions.size())));
-        selectedQuestions.addAll(multipleChoiceQuestions.subList(0, Math.min(halfQuestions, multipleChoiceQuestions.size())));
-
-        return createQuizInstance(selectedQuestions);
+        // Selecciona preguntas al azar del pool de preguntas
+        List<Question> selectedQuestions = new ArrayList<>(questionPool);
+        Collections.shuffle(selectedQuestions); // Baraja el pool de preguntas
+        return createQuizInstance(selectedQuestions.subList(0, numberOfQuestions)); // Selecciona el número de preguntas solicitado
     }
+
 
     /**
      * Generates a revision quiz that only includes questions the student hasn't seen before or has answered incorrectly.
@@ -146,9 +123,30 @@ public abstract class QuizFactory implements Quiz {
     protected abstract Quiz createRevisionQuizInstance(List<Question> revisionQuestions, Student student);
 
     // Registrar preguntas vistas en el historial del estudiante
-    protected void recordSeenQuestions(Student student, List<Question> seenQuestions) {
+    public void recordSeenQuestions(Student student, List<Question> seenQuestions) {
+        // Si el historial del estudiante no está presente, inicialízalo
         studentHistory.putIfAbsent(student, new ArrayList<>());
-        studentHistory.get(student).addAll(seenQuestions);
+
+        // Agregar las preguntas vistas al historial del estudiante
+        List<Question> history = studentHistory.get(student);
+        //System.out.println("HashCode del estudiante accedido: " + student.hashCode());
+        //System.out.println("Contenido del mapa antes de añadir: " + studentHistory);
+
+        if (history != null) {
+            history.addAll(seenQuestions); // Añadir preguntas al historial
+            System.out.println("Registrando preguntas: " + seenQuestions + " para el estudiante: " + student);
+
+            //System.out.println("Historial actualizado para el estudiante: " + student + " con preguntas: " + seenQuestions);
+        } else {
+            throw new IllegalStateException("Failed to initialize question history for student.");
+        }
+
+        System.out.println("Contenido del mapa después de añadir: " + studentHistory);
+    }
+
+
+    public Map<Student, List<Question>> getStudentHistory() {
+        return studentHistory;
     }
 }
 

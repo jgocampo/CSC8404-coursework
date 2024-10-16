@@ -6,8 +6,11 @@ import statistics.Statistics;
 import java.util.List;
 
 public final class RegularQuiz extends QuizFactory {
+
+
     public RegularQuiz(List<Question> questionPool) {
         super(questionPool);
+
     }
 
     @Override

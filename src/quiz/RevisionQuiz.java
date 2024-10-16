@@ -8,9 +8,9 @@ import java.util.List;
 public final class RevisionQuiz extends QuizFactory {
 
 
-
     public RevisionQuiz(List<Question> questionPool, Student student) {
         super(questionPool);
+
     }
 
     @Override
@@ -40,11 +40,11 @@ public final class RevisionQuiz extends QuizFactory {
 
         double score = (double) correctAnswers / questions.size();
 
-        // Registrar el puntaje en las estadísticas (no afecta el veredicto)
-        student.getStatistics().recordRevisionQuizScore(score);
-
         // Registrar las preguntas vistas
         recordSeenQuestions(student, questions);
+
+        // Registrar el puntaje en las estadísticas (no afecta el veredicto)
+        student.getStatistics().recordRevisionQuizScore(score);
 
         return score;
     }

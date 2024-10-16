@@ -21,5 +21,4 @@ public interface Quiz {
     // Calcula el puntaje del quiz
     double takeQuiz(Student student, List<Question> questions, List<String> answers);
 
-    //List<Question> getQuestions();
 }
