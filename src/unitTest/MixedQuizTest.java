@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 import question.FreeResponseQuestion;
 import question.MultipleChoiceQuestion;
 import question.Question;
+import quiz.Quiz;
+import quiz.QuizFactory;
 import quiz.RegularQuiz;
 import quiz.RevisionQuiz;
 import student.Student;
@@ -17,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MixedQuizTest {
 
     private List<Question> questionPool;
-    private RegularQuiz regularQuiz;
-    private RevisionQuiz revisionQuiz;
+    private QuizFactory quizFactory; // Declarar el QuizFactory
+    private QuizFactory quizFactory1;
     private Student student;
     private Set<Question> seenQuestions;
 
@@ -51,22 +53,25 @@ public class MixedQuizTest {
         questionPool.add(new MultipleChoiceQuestion("Which of the following are chemical elements?", new String[]{"Oxygen", "Hydrogen", "Carbon"}));
         questionPool.add(new MultipleChoiceQuestion("Which of the following are continents?", new String[]{"Africa", "Asia", "Europe"}));
 
-        // Crear RegularQuiz y RevisionQuiz con el mismo banco de preguntas
-        regularQuiz = new RegularQuiz(questionPool);
-        revisionQuiz = new RevisionQuiz(questionPool, student);
-
         // Crear un estudiante
         Calendar cal = Calendar.getInstance();
         cal.set(1995, Calendar.JANUARY, 1);
         Date birthDate = cal.getTime();
         student = new Student("John", "Doe", birthDate);
 
+        // Inicializar el QuizFactory con el pool de preguntas
+        quizFactory = new RevisionQuiz(questionPool, student);
+
+        // Inicializar el QuizFactory con el pool de preguntas
+        quizFactory1 = new RegularQuiz(questionPool);
+
         // Inicializar un conjunto de preguntas vistas para rastrear
         seenQuestions = new HashSet<>();
     }
 
+
     @Test
-    public void testRevisionAndRegularQuizzes() {
+    public void testRevisionAndRegularQuizzesWithHistoryValidation() {
         Statistics stats = student.getStatistics();
 
         // 1. Primer intento de quiz de revisión (no afecta el veredicto)
@@ -78,20 +83,21 @@ public class MixedQuizTest {
         );
         List<String> answers1 = List.of("Paris", "George Orwell", "Apple,Banana,Orange", "Red,Green,Blue");
 
-        // Primer quiz de revisión
-        double revisionScore1 = revisionQuiz.takeQuiz(student, revisionQuestions1, answers1);
+        Quiz revisionQuiz1 = quizFactory.revise(student, 4);
+        // Tomar el primer quiz de revisión
+        double revisionScore1 = revisionQuiz1.takeQuiz(student, revisionQuestions1, answers1);
         System.out.println("Primer quiz de revisión score: " + revisionScore1);
 
         // Verificar que el veredicto sigue siendo TBD
         assertEquals("TBD", stats.getVerdict());
 
-        // Verificar que las preguntas vistas en el primer quiz de revisión se registraron correctamente
-        for (Question question : revisionQuestions1) {
+        // Verificar que las preguntas vistas se registren en el historial del estudiante
+        quizFactory.recordSeenQuestions(student, revisionQuestions1);
+        List<Question> recordedHistory1 = quizFactory.getStudentHistory().get(student);
+        assertNotNull(recordedHistory1, "El historial de preguntas vistas no debe ser nulo.");
+        assertTrue(recordedHistory1.containsAll(revisionQuestions1), "Las preguntas del primer quiz de revisión deben estar registradas en el historial.");
 
-            assertTrue(stats.hasSeenQuestion(question.getQuestionFormulation()), "Seen Question: " + question.getQuestionFormulation());
-        }
-
-        // 2. Primer intento de regular quiz (fallido)
+        // 2. Primer intento de quiz regular (fallido)
         List<Question> regularQuestions1 = Arrays.asList(
                 questionPool.get(2), // FreeResponse: "What is the chemical symbol for water?"
                 questionPool.get(3), // FreeResponse: "Who was the first president of the United States?"
@@ -100,18 +106,20 @@ public class MixedQuizTest {
         );
         List<String> incorrectAnswers = List.of("Wrong Answer", "Wrong Answer", "Wrong Answer", "Wrong Answer");
 
-        // Primer quiz regular
-        double regularScore1 = regularQuiz.takeQuiz(student, regularQuestions1, incorrectAnswers);
+        Quiz regularQuiz1 = quizFactory1.generateQuiz(4);
+        // Tomar el primer quiz regular
+        double regularScore1 = regularQuiz1.takeQuiz(student, regularQuestions1, incorrectAnswers);
         System.out.println("Primer quiz regular score (fallido): " + regularScore1);
 
         // Verificar que falló el primer regular quiz
         assertEquals(0.0, regularScore1);
-        assertEquals("TBD", stats.getVerdict());  // Veredicto aún no cambia después de fallar el primer quiz
+        assertEquals("TBD", stats.getVerdict());  // Veredicto aún no cambia
 
-        // Verificar que las preguntas vistas en el primer regular quiz se registraron correctamente
-        for (Question question : regularQuestions1) {
-            assertTrue(stats.hasSeenQuestion(question.getQuestionFormulation()), "Pregunta vista: " + question.getQuestionFormulation());
-        }
+        // Verificar que las preguntas vistas en el primer quiz regular se registren
+        quizFactory.recordSeenQuestions(student, regularQuestions1);
+        List<Question> recordedHistory2 = quizFactory.getStudentHistory().get(student);
+        assertNotNull(recordedHistory2, "El historial de preguntas vistas no debe ser nulo.");
+        assertTrue(recordedHistory2.containsAll(regularQuestions1), "Las preguntas del primer quiz regular deben estar registradas en el historial.");
 
         // 3. Segundo intento de quiz de revisión
         List<Question> revisionQuestions2 = Arrays.asList(
@@ -122,19 +130,21 @@ public class MixedQuizTest {
         );
         List<String> answers2 = List.of("Mount Everest", "Mars", "Dog,Cat,Elephant", "France,Germany,Brazil");
 
-        // Segundo quiz de revisión
-        double revisionScore2 = revisionQuiz.takeQuiz(student, revisionQuestions2, answers2);
+        Quiz revisionQuiz2 = quizFactory.revise(student, 4);
+        // Tomar el segundo quiz de revisión
+        double revisionScore2 = revisionQuiz2.takeQuiz(student, revisionQuestions2, answers2);
         System.out.println("Segundo quiz de revisión score: " + revisionScore2);
 
         // Verificar que el veredicto sigue siendo TBD (los quizzes de revisión no afectan el veredicto)
         assertEquals("TBD", stats.getVerdict());
 
-        // Verificar que las preguntas vistas en el segundo quiz de revisión se registraron correctamente
-        for (Question question : revisionQuestions2) {
-            assertTrue(stats.hasSeenQuestion(question.getQuestionFormulation()), "Pregunta vista: " + question.getQuestionFormulation());
-        }
+        // Verificar que las preguntas vistas del segundo quiz de revisión se registren correctamente
+        quizFactory.recordSeenQuestions(student, revisionQuestions2);
+        List<Question> recordedHistory3 = quizFactory.getStudentHistory().get(student);
+        assertNotNull(recordedHistory3, "El historial de preguntas vistas no debe ser nulo.");
+        assertTrue(recordedHistory3.containsAll(revisionQuestions2), "Las preguntas del segundo quiz de revisión deben estar registradas en el historial.");
 
-        // 4. Segundo intento de regular quiz (aprobado)
+        // 4. Segundo intento de quiz regular (aprobado)
         List<Question> regularQuestions2 = Arrays.asList(
                 questionPool.get(6), // FreeResponse: "What is the smallest prime number?"
                 questionPool.get(7), // FreeResponse: "What element does 'O' represent on the periodic table?"
@@ -143,8 +153,10 @@ public class MixedQuizTest {
         );
         List<String> correctAnswers = List.of("2", "Oxygen", "Mars,Venus,Jupiter", "Carrot,Broccoli,Spinach");
 
-        // Segundo quiz regular
-        double regularScore2 = regularQuiz.takeQuiz(student, regularQuestions2, correctAnswers);
+
+        Quiz regularQuiz2 = quizFactory1.generateQuiz(4);
+        // Tomar el segundo quiz regular
+        double regularScore2 = regularQuiz2.takeQuiz(student, regularQuestions2, correctAnswers);
         System.out.println("Segundo quiz regular score (aprobado): " + regularScore2);
 
         // Verificar que el estudiante pasó el segundo regular quiz
@@ -153,13 +165,12 @@ public class MixedQuizTest {
         // Verificar que el veredicto cambia a PASS
         assertEquals("PASS", stats.getVerdict());
 
-        // Verificar que las preguntas vistas en el segundo regular quiz se registraron correctamente
-        for (Question question : regularQuestions2) {
-            assertTrue(stats.hasSeenQuestion(question.getQuestionFormulation()), "Pregunta vista: " + question.getQuestionFormulation());
-        }
+        // Verificar que las preguntas vistas en el segundo quiz regular se registren correctamente
+        quizFactory.recordSeenQuestions(student, regularQuestions2);
+        List<Question> recordedHistory4 = quizFactory.getStudentHistory().get(student);
+        assertNotNull(recordedHistory4, "El historial de preguntas vistas no debe ser nulo.");
+        assertTrue(recordedHistory4.containsAll(regularQuestions2), "Las preguntas del segundo quiz regular deben estar registradas en el historial.");
     }
-
-
 
 
 

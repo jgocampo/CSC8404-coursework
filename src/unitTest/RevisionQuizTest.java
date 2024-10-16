@@ -114,9 +114,6 @@ public class RevisionQuizTest {
     }
 
 
-
-
-
     @Test
     public void testCannotTakeMoreThanTwoRevisionQuizzes() {
         // Primer quiz de revisión

@@ -79,6 +79,7 @@ public class StatisticsTest {
 
         // Generar el informe de estadísticas
         String report = statistics.generateStatistics();
+        System.out.println(report);
 
         // Verificar que el informe contiene toda la información correcta
         assertTrue(report.contains("Final verdict: PASS"));

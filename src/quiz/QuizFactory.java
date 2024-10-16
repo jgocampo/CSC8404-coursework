@@ -43,10 +43,10 @@ public abstract class QuizFactory implements Quiz {
             throw new IllegalArgumentException("Invalid number of questions. Must be between 1 and " + questionPool.size());
         }
 
-        // Selecciona preguntas al azar del pool de preguntas
+
         List<Question> selectedQuestions = new ArrayList<>(questionPool);
-        Collections.shuffle(selectedQuestions); // Baraja el pool de preguntas
-        return createQuizInstance(selectedQuestions.subList(0, numberOfQuestions)); // Selecciona el número de preguntas solicitado
+        Collections.shuffle(selectedQuestions);
+        return createQuizInstance(selectedQuestions.subList(0, numberOfQuestions));
     }
 
 
@@ -89,11 +89,10 @@ public abstract class QuizFactory implements Quiz {
     protected List<Question> selectUnseenOrIncorrectQuestions(int numberOfQuestions, Student student) {
         List<Question> unseenOrIncorrectQuestions = new ArrayList<>();
 
-        // Obtener el historial de preguntas vistas y respondidas incorrectamente
         List<Question> history = studentHistory.getOrDefault(student, new ArrayList<>());
         for (Question question : questionPool) {
             if (!history.contains(question)) {
-                unseenOrIncorrectQuestions.add(question);  // Añadir preguntas no vistas
+                unseenOrIncorrectQuestions.add(question);
             }
         }
 
@@ -101,7 +100,7 @@ public abstract class QuizFactory implements Quiz {
             throw new IllegalArgumentException("Not enough unseen or incorrectly answered questions.");
         }
 
-        Collections.shuffle(unseenOrIncorrectQuestions);  // Barajar las preguntas
+        Collections.shuffle(unseenOrIncorrectQuestions);
         return unseenOrIncorrectQuestions.subList(0, numberOfQuestions);
     }
 
@@ -122,28 +121,33 @@ public abstract class QuizFactory implements Quiz {
      */
     protected abstract Quiz createRevisionQuizInstance(List<Question> revisionQuestions, Student student);
 
-    // Registrar preguntas vistas en el historial del estudiante
+    /**
+     * Method to record the questions a student has seen in quiz attempt .
+     *
+     * @param seenQuestions Is a list of the Questions the student saw on the attempt.
+     * @param student The student taking the quiz.
+     *
+     */
+
     public void recordSeenQuestions(Student student, List<Question> seenQuestions) {
-        // Si el historial del estudiante no está presente, inicialízalo
+
         studentHistory.putIfAbsent(student, new ArrayList<>());
 
-        // Agregar las preguntas vistas al historial del estudiante
         List<Question> history = studentHistory.get(student);
-        //System.out.println("HashCode del estudiante accedido: " + student.hashCode());
-        //System.out.println("Contenido del mapa antes de añadir: " + studentHistory);
 
         if (history != null) {
-            history.addAll(seenQuestions); // Añadir preguntas al historial
-            System.out.println("Registrando preguntas: " + seenQuestions + " para el estudiante: " + student);
+            history.addAll(seenQuestions); // Add questions to the history
 
-            //System.out.println("Historial actualizado para el estudiante: " + student + " con preguntas: " + seenQuestions);
         } else {
             throw new IllegalStateException("Failed to initialize question history for student.");
         }
-
-        System.out.println("Contenido del mapa después de añadir: " + studentHistory);
     }
 
+    /**
+     * Method to get the students history.
+     *
+     * @return The msp with the student history.
+     */
 
     public Map<Student, List<Question>> getStudentHistory() {
         return studentHistory;
