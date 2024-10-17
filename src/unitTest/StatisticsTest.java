@@ -11,6 +11,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the Statistics class, this test tracks the student statistics
+ * giving different quiz scores to the student.
+ */
+
 public class StatisticsTest {
 
     private Student student;
@@ -19,9 +24,9 @@ public class StatisticsTest {
     @BeforeEach
     public void setup() {
         Calendar cal = Calendar.getInstance();
-        cal.set(1995, Calendar.JANUARY, 1);
+        cal.set(1998, Calendar.DECEMBER, 10);
         Date birthDate = cal.getTime();
-        student = new Student("John", "Doe", birthDate);
+        student = new Student("Jhostin", "Ocampo", birthDate);
         statistics = student.getStatistics();
     }
 
@@ -34,20 +39,20 @@ public class StatisticsTest {
     @Test
     public void testRegularQuizFail() {
         statistics.recordRegularQuizScore(0.3);  // Failed first quiz
-        assertEquals("TBD", statistics.getVerdict());  // Still pending
+        assertEquals("TBD", statistics.getVerdict());
 
         statistics.recordRegularQuizScore(0.4);  // Failed second quiz
-        assertEquals("FAIL", statistics.getVerdict());  // Verdict: FAIL
+        assertEquals("FAIL", statistics.getVerdict());
     }
 
     @Test
     public void testRevisionQuizWithoutAffectingVerdict() {
         statistics.recordRegularQuizScore(0.3);  // Fail first regular quiz
         statistics.recordRevisionQuizScore(0.6);  // PASS revision quiz, but no effect on verdict
-        assertEquals("TBD", statistics.getVerdict());  // Still TBD
+        assertEquals("TBD", statistics.getVerdict());
 
         statistics.recordRegularQuizScore(0.4);  // Fail second regular quiz
-        assertEquals("FAIL", statistics.getVerdict());  // Final verdict: FAIL
+        assertEquals("FAIL", statistics.getVerdict());
     }
 
     @Test
@@ -60,28 +65,18 @@ public class StatisticsTest {
         assertEquals(2, statistics.getRevisionAttempts());
     }
 
-
-    /**
-     * Prueba para verificar el método generateStatistics.
-     */
     @Test
     public void testGenerateStatisticsReport() {
 
-        // Registrar puntajes de quizzes de revisión
         statistics.recordRevisionQuizScore(0.4);  // First revision quiz
         statistics.recordRevisionQuizScore(0.5);  // Second revision quiz
 
-        // Registrar puntajes de quizzes regulares
         statistics.recordRegularQuizScore(0.3);  // Failed first regular quiz
         statistics.recordRegularQuizScore(0.6);  // PASSED second regular quiz (should mark as PASS)
 
-
-
-        // Generar el informe de estadísticas
         String report = statistics.generateStatistics();
         System.out.println(report);
 
-        // Verificar que el informe contiene toda la información correcta
         assertTrue(report.contains("Final verdict: PASS"));
         assertTrue(report.contains("Number of regular quiz attempts: 2"));
         assertTrue(report.contains("Number of revision quiz attempts: 2"));

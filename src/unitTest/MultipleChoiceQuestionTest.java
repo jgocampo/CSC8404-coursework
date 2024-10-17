@@ -16,10 +16,10 @@ public class MultipleChoiceQuestionTest {
         MultipleChoiceQuestion question = new MultipleChoiceQuestion(
                 "Which of the following are prime numbers?", new String[]{"a", "b", "c"}
         );
-        // Respuesta correcta con diferentes órdenes
+
         assertTrue(question.checkAnswer("a,b,c"));
         assertTrue(question.checkAnswer("b,c,a"));
-        assertTrue(question.checkAnswer("c,a,b"));
+        assertTrue(question.checkAnswer("c,A,b"));
     }
 
     /**
@@ -31,11 +31,11 @@ public class MultipleChoiceQuestionTest {
                 "Which of the following are prime numbers?", new String[]{"a", "b", "c"}
         );
 
-        // Faltan literales
-        assertFalse(question.checkAnswer("a,b"));  // Faltan respuestas
-        assertFalse(question.checkAnswer("b"));    // Solo una respuesta
-        // Literales de más
-        assertFalse(question.checkAnswer("a,b,c,d"));  // Respuesta con un literal extra
+
+        assertFalse(question.checkAnswer("a,b"));
+        assertFalse(question.checkAnswer("b"));
+
+        assertFalse(question.checkAnswer("a,b,c,d"));
     }
 
     /**
@@ -58,19 +58,21 @@ public class MultipleChoiceQuestionTest {
                 "Which of the following are prime numbers?", new String[]{"a", "b", "c"}
         );
         // Respuesta mal formateada
-        assertFalse(question.checkAnswer("a-b-c"));  // Respuesta mal separada
+        assertFalse(question.checkAnswer("a-b-c"));
     }
 
     /**
-     * Test answer with extra spaces is still considered correct.
+     * Test answer with extra spaces and case sensitive
+     * is still considered correct.
      */
     @Test
-    public void testCorrectAnswerWithSpaces() {
+    public void testCorrectAnswerWithSpacesAndCase() {
         MultipleChoiceQuestion question = new MultipleChoiceQuestion(
                 "Which of the following are prime numbers?", new String[]{"a", "b", "c"}
         );
         // Respuesta correcta con espacios adicionales
         assertTrue(question.checkAnswer("  a,  b ,c   "));
+        assertTrue(question.checkAnswer("  A,  b ,C  "));
     }
 }
 

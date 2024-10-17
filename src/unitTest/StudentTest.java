@@ -14,90 +14,80 @@ import static org.junit.jupiter.api.Assertions.*;
 public class StudentTest {
 
     /**
-     * Test para verificar la correcta creación de un objeto Student y los getters de los atributos.
+     * Test to verify the correct creation of a Student object and the attribute getters.
      */
     @Test
     public void testStudentCreationAndGetters() {
-        // Crear fecha de nacimiento
+
         Calendar cal = Calendar.getInstance();
-        cal.set(1990, Calendar.JANUARY, 1);
+        cal.set(1998, Calendar.DECEMBER, 10);
         Date birthDate = cal.getTime();
 
-        // Crear un estudiante
-        Student student = new Student("John", "Doe", birthDate);
+        Student student = new Student("Jhostin", "Ocampo", birthDate);
 
-        // Verificar que los atributos se hayan asignado correctamente
-        assertEquals("John", student.getFirstName());
-        assertEquals("Doe", student.getLastName());
-        assertEquals("John Doe", student.getName());
+        assertEquals("Jhostin", student.getFirstName());
+        assertEquals("Ocampo", student.getLastName());
+        assertEquals("Jhostin Ocampo", student.getName());
         assertEquals(birthDate, student.getDateOfBirth());
     }
 
     /**
-     * Test para verificar que el método getDateOfBirth retorna una copia y no la referencia directa.
+     * Test to verify that the getDateOfBirth method returns a copy and not the direct reference.
      */
     @Test
-    public void testGetDateOfBirthImmutability() {
-        // Crear fecha de nacimiento
+    public void testGetDateOfBirth() {
         Calendar cal = Calendar.getInstance();
-        cal.set(1990, Calendar.JANUARY, 1);
+        cal.set(1994, Calendar.JANUARY, 29);
         Date birthDate = cal.getTime();
 
-        // Crear un estudiante
-        Student student = new Student("Jane", "Doe", birthDate);
+        Student student = new Student("Alixon", "Ocampo", birthDate);
 
-        // Obtener la fecha de nacimiento a través del getter y modificarla
         Date retrievedDate = student.getDateOfBirth();
         retrievedDate.setTime(System.currentTimeMillis());
 
-        // Verificar que la fecha en el objeto student no haya cambiado
         assertEquals(birthDate, student.getDateOfBirth());
     }
 
     /**
-     * Test para verificar que los nombres se trimen correctamente y se almacenan sin espacios extra.
+     * Test to verify that names are trimmed correctly and stored without extra spaces.
      */
     @Test
     public void testNameTrimming() {
-        // Crear fecha de nacimiento
+
         Calendar cal = Calendar.getInstance();
         cal.set(1990, Calendar.JANUARY, 1);
         Date birthDate = cal.getTime();
 
-        // Crear un estudiante con nombres con espacios
-        Student student = new Student("   John   ", "   Doe   ", birthDate);
+        Student student = new Student("   John   ", "   Ocampo   ", birthDate);
 
-        // Verificar que los espacios se hayan eliminado
         assertEquals("John", student.getFirstName());
-        assertEquals("Doe", student.getLastName());
-        assertEquals("John Doe", student.getName());
+        assertEquals("Ocampo", student.getLastName());
+        assertEquals("John Ocampo", student.getName());
     }
 
     /**
-     * Test para verificar que dos estudiantes con el mismo nombre y fecha de nacimiento son considerados iguales.
+     * Test to verify that two students with the same name and date of birth are considered equal.
      */
     @Test
-    public void testEqualsSameStudent() {
-        // Crear fecha de nacimiento
+    public void testEqualsStudent() {
+
         Calendar cal = Calendar.getInstance();
         cal.set(1990, Calendar.JANUARY, 1);
         Date birthDate = cal.getTime();
 
-        // Crear dos estudiantes con los mismos nombres y fecha de nacimiento
         Student student1 = new Student("John", "Doe", birthDate);
-        Student student2 = new Student("john", "doe", birthDate);  // Case-insensitive
+        Student student2 = new Student("john", "doe", birthDate);
 
-        // Verificar que sean iguales
         assertEquals(student1, student2);
-        assertEquals(student1.hashCode(), student2.hashCode());  // El hashCode también debería ser el mismo
+        assertEquals(student1.hashCode(), student2.hashCode());
     }
 
     /**
-     * Test para verificar que dos estudiantes con diferente nombre o fecha de nacimiento no son iguales.
+     * Test to verify that two students with different names or dates of birth are not the same.
      */
     @Test
-    public void testNotEqualsDifferentStudent() {
-        // Crear dos fechas de nacimiento diferentes
+    public void testNotEqualsStudent() {
+
         Calendar cal1 = Calendar.getInstance();
         cal1.set(1990, Calendar.JANUARY, 1);
         Date birthDate1 = cal1.getTime();
@@ -106,52 +96,45 @@ public class StudentTest {
         cal2.set(1991, Calendar.FEBRUARY, 1);
         Date birthDate2 = cal2.getTime();
 
-        // Crear dos estudiantes con nombres o fechas de nacimiento diferentes
-        Student student1 = new Student("John", "Doe", birthDate1);
+        Student student1 = new Student("John", "Ocampo", birthDate1);
         Student student2 = new Student("John", "Smith", birthDate1);
-        Student student3 = new Student("Jane", "Doe", birthDate2);
+        Student student3 = new Student("Jane", "Ocampo", birthDate2);
 
-        // Verificar que no son iguales
-        assertNotEquals(student1, student2);  // Nombres diferentes
-        assertNotEquals(student1, student3);  // Fecha de nacimiento diferente
+        assertNotEquals(student1, student2);
+        assertNotEquals(student1, student3);
     }
 
     /**
-     * Test para verificar el método toString.
+     * Test for the toString method.
      */
     @Test
     public void testToString() {
-        // Crear fecha de nacimiento
+
         Calendar cal = Calendar.getInstance();
-        cal.set(1990, Calendar.JANUARY, 1);
+        cal.set(1995, Calendar.JANUARY, 1);
         Date birthDate = cal.getTime();
 
-        // Crear un estudiante
-        Student student = new Student("John", "Doe", birthDate);
+        Student student = new Student("John", "Ocampo", birthDate);
 
-        // Verificar que el método toString retorna el formato correcto
-        String expected = "John Doe (born " + birthDate + ")";
+        String expected = "John Ocampo (born " + birthDate + ")";
         assertEquals(expected, student.toString());
     }
 
     /**
-     * Test para verificar que el método getStatistics retorna un objeto Statistics asociado con el estudiante.
+     * Test to verify that the getStatistics method returns a Statistics object associated with the student.
      */
     @Test
     public void testGetStatistics() {
-        // Crear fecha de nacimiento
+
         Calendar cal = Calendar.getInstance();
         cal.set(1990, Calendar.JANUARY, 1);
         Date birthDate = cal.getTime();
 
-        // Crear un estudiante
         Student student = new Student("John", "Doe", birthDate);
 
-        // Verificar que getStatistics retorna un objeto Statistics
         Statistics stats = student.getStatistics();
         assertNotNull(stats);
 
-        // Verificar que las estadísticas están asociadas con el estudiante correcto
         assertEquals(student, stats.getStudent());
     }
 }

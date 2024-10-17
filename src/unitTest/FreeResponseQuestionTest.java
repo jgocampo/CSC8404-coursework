@@ -11,33 +11,33 @@ public class FreeResponseQuestionTest {
 
     @Test
     public void testCorrectAnswer() {
-        FreeResponseQuestion question = new FreeResponseQuestion("What is the capital of France?", "Paris");
-        assertTrue(question.checkAnswer("paris"));
+        FreeResponseQuestion question = new FreeResponseQuestion("What is the capital of Ecuador?", "Quito");
+        assertTrue(question.checkAnswer("quito"));
     }
 
 
     @Test
     public void testCorrectAnswerWithSpacesAndCase() {
-        FreeResponseQuestion question = new FreeResponseQuestion("What is the capital of France?", "Paris");
-        assertTrue(question.checkAnswer("  PaRiS "));
+        FreeResponseQuestion question = new FreeResponseQuestion("What is the capital of Ecuador?", "Quito");
+        assertTrue(question.checkAnswer("  quIto "));
     }
 
 
     @Test
     public void testIncorrectAnswer() {
-        FreeResponseQuestion question = new FreeResponseQuestion("What is the capital of France?", "Paris");
+        FreeResponseQuestion question = new FreeResponseQuestion("What is the capital of Ecuador?", "Quito");
         assertFalse(question.checkAnswer("London"));
     }
 
     @Test
     public void testNullAnswer() {
-        FreeResponseQuestion question = new FreeResponseQuestion("What is the capital of France?", "Paris");
+        FreeResponseQuestion question = new FreeResponseQuestion("What is the capital of Ecuador?", "Quito");
         assertFalse(question.checkAnswer(null));
     }
 
     @Test
     public void testEmptyAnswer() {
-        FreeResponseQuestion question = new FreeResponseQuestion("What is the capital of France?", "Paris");
+        FreeResponseQuestion question = new FreeResponseQuestion("What is the capital of Ecuador?", "Quito");
         assertFalse(question.checkAnswer(""));
     }
 }
